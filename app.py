@@ -47,7 +47,7 @@ submit = st.button('Submit')
 input_prompt = """
 Hey, can you act like a skilled or very experienced ATS(Application Tracking System) with a deep understanding of tech field, software engineering, data science, data analyst
 and big data engineer. Your task is to evaluate the resume based on the given job description. You must consider the job market is very competitive and you should provide 
-best assistance for improving the resume. Assign the percentage Matching based on Jd and the missing keywords with high accuracy
+best assistance for improving the resume. Assign the percentage Matching based on job description and the missing technical keywords from job description with high accuracy
 resume:{text}
 description:{jd}
 

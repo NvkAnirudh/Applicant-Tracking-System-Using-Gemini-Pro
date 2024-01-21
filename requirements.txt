@@ -1,4 +1,8 @@
 streamlit
 google-generativeai
 python-dotenv
+<<<<<<< HEAD
 PyPDF2
+=======
+PyPDF2
+>>>>>>> 2c673705 (Updated codebase)
