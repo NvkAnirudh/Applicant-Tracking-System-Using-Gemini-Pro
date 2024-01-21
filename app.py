@@ -8,81 +8,59 @@ load_dotenv()
 
 import streamlit as st
 import os
-import io
-import base64
-from PIL import Image
-import pdf2image
+import json
+import PyPDF2 as pdf
 import google.generativeai as genai
 
 genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
 
-def get_gemini_response(prompt, pdf_content, input):
-    model = genai.GenerativeModel('gemini-pro-vision')
+def get_gemini_response(input):
+    model = genai.GenerativeModel('gemini-pro')
 
-    response = model.generate_content([prompt, pdf_content[0], input])
+    response = model.generate_content(input)
     return response.text
 
 def input_pdf_setup(uploaded_file):
     if uploaded_file is not None:
-        # Converting the pdf to image
-        images = pdf2image.convert_from_bytes(uploaded_file.read())
-
-        first_page = images[0]
-
-        # Converting the image to bytes
-        image_byte_arr = io.BytesIO()
-        first_page.save(image_byte_arr, format='JPEG')
-        image_byte_arr = image_byte_arr.getvalue()
-
-        pdf_parts = [
-            {
-                'mime_type': 'image/jpeg',
-                'data': base64.b64encode(image_byte_arr).decode() 
-            }
-        ]
-
-        return pdf_parts
+        reader = pdf.PdfReader(uploaded_file)
+        text = ""
+        for page in range(len(reader.pages)):
+            page = reader.pages[page]
+            text += str(page.extract_text())
+        return text
     else:
         raise FileNotFoundError('No File Uploaded')
     
 # Streamlit app
 st.set_page_config(page_title='ATS')
+st.text("Improve your Resume")
 st.header('Applicant Tracking System')
-input_text = st.text_area('Job Description:',key='input')
+jd = st.text_area('Job Description:',key='input')
 
-uploaded_file = st.file_uploader('Upload Your Resume(in PDF format)',type=['pdf'])
+uploaded_file = st.file_uploader('Upload Your Resume(in PDF format)',type=['pdf'],help='Please upload the required pdf')
 
 if uploaded_file is not None:
     st.write('PDF Uploaded Successfully')
 
-submit1 = st.button('Percentage Match (Resume Score)')
-submit2 = st.button('What are the important keywords that are missing in the resume')
+submit = st.button('Submit')
 
-input_prompt1 = """
-You are a skilled ATS (Applicant Tracking System) scanner with a deep understanding of data science and ATS functionality, 
-your task is to evaluate the resume against the provided job description. Give me the percentage of match if the resume matches
-the job description. The ouput should consist the percentage sccore only.
+input_prompt = """
+Hey, can you act like a skilled or very experienced ATS(Application Tracking System) with a deep understanding of tech field, software engineering, data science, data analyst
+and big data engineer. Your task is to evaluate the resume based on the given job description. You must consider the job market is very competitive and you should provide 
+best assistance for improving the resume. Assign the percentage Matching based on Jd and the missing keywords with high accuracy
+resume:{text}
+description:{jd}
+
+I want the response in the following structure:
+"JD Match":"%"
+"MissingKeywords:[]"
+"Profile Summary":""
 """
 
-input_prompt2 = """
-You are a skilled ATS (Applicant Tracking System) scanner with a deep understanding of data science and ATS functionality, 
-your task is to evaluate the resume against the provided job description. Give me the percentage of match if the resume matches
-the job description. The ouput should contain both the percentage score and the keywords that are missing. 
-"""
-
-if submit1:
+if submit:
     if uploaded_file is not None:
-        pdf_content = input_pdf_setup(uploaded_file)
-        response = get_gemini_response(input_prompt1,pdf_content,input_text)
-        st.subheader('Response:')
-        st.write(response)
-    else:
-        st.write('Please upload the resume')
-
-if submit2:
-    if uploaded_file is not None:
-        pdf_content = input_pdf_setup(uploaded_file)
-        response = get_gemini_response(input_prompt2,pdf_content,input_text)
+        text = input_pdf_setup(uploaded_file)
+        response = get_gemini_response(input_prompt)
         st.subheader('Response:')
         st.write(response)
     else:
