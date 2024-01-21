@@ -47,7 +47,7 @@ submit = st.button('Submit')
 input_prompt = """
 Hey, can you act like a skilled or very experienced ATS(Application Tracking System) with a deep understanding of tech field, software engineering, data science, data analyst
 and big data engineer. Your task is to evaluate the resume based on the given job description. You must consider the job market is very competitive and you should provide 
-best assistance for improving the resume. Assign the percentage Matching based on job description, the missing technical keywords from job description with high accuracy, summary, and resume improvements
+best assistance for improving the resume. Assign the percentage matching based on job description, the missing technical keywords from job description with high accuracy, summary, and resume improvements
 for the right job description. 
 resume:{text}
 description:{jd}
@@ -56,6 +56,7 @@ I want the response in the following structure:
 "JD Match":"%"
 "MissingKeywords:[]"
 "Profile Summary":""
+"Improvements":""
 """
 
 if submit:
